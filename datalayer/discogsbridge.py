@@ -17,8 +17,8 @@ class DiscogsBridge(object):
 
     @dispatch()
     def __init__(self):
-        key = "vjKRGQQBIgvJfZxcTCCK"
-        secret = "QNyFiIGvJejsGfjBLxjYQhOIlMiAfFQL"
+        key = "YOUR KEY"
+        secret = "YOUR SECRET"
         self.__temp_collaborators: list[dict] = []
 
         self.__dc: discogs_client.Client = discogs_client.Client(
