@@ -53,7 +53,5 @@ class DiscogsBridge(object):
         else:
             return result
 
-    def __get_collaborators(self, a_data: dict, year: int = 1935):
-        pass
 
 

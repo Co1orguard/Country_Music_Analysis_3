@@ -43,20 +43,21 @@ class ArtistGraph(GraphBase):
         level = 0
         for node in node_queue:
             self.add_artist(node)
-            if level <= depth and node.collaborators is not None:
+            if node.collaborators is not None:
                 for coll in node.collaborators:
                     level = node.level + 1
-                    # Find the collaborator in the database or create it
-                    # Add the collaborator to the graph ONLY if the node isn't
-                    # already in the graph; only add if the level is <= depth
-                    collaborator, roles = self.__get_collaborator(coll, level)
-                    if not self.has_node(collaborator):
-                        self.add_artist(collaborator)
-                        node_queue.append(collaborator)
+                    if level <= depth:
+                        # Find the collaborator in the database or create it
+                        # Add the collaborator to the graph ONLY if the node isn't
+                        # already in the graph; only add if the level is <= depth
+                        collaborator, roles = self.__get_collaborator(coll, level)
+                        if not self.has_node(collaborator):
+                            self.add_artist(collaborator)
+                            node_queue.append(collaborator)
 
-                    # Add the collaboration/edge to the graph
-                    collaboration = Collaboration(node, collaborator, roles)
-                    self.add_collaboration(collaboration)
+                        # Add the collaboration/edge to the graph
+                        collaboration = Collaboration(node, collaborator, roles)
+                        self.add_collaboration(collaboration)
 
     @property
     def artists(self) -> List[Artist]:
@@ -92,19 +93,22 @@ class ArtistGraph(GraphBase):
         """
         Compute the degree centrality of the graph
         """
-        pass
+        dc = degree_centrality(super().graph)
+        nx.set_node_attributes(super().graph, dc, name="degree_centrality")
 
     def compute_closeness_centrality(self):
         """
         Compute the closeness centrality of the graph
         """
-        pass
+        cc = closeness_centrality(super().graph)
+        nx.set_node_attributes(super().graph, cc, name="closeness_centrality")
 
     def compute_betweenness_centrality(self):
         """
         Compute the betweenness centrality of the graph
         """
-        pass
+        bc = betweenness_centrality(super().graph)
+        nx.set_node_attributes(super().graph, bc, name="betweenness_centrality")
 
     def __get_collaborator(self, coll: dict, level: int) -> Tuple[Artist, List]:
         """
