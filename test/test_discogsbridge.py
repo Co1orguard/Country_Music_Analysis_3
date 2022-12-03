@@ -2,7 +2,6 @@ from unittest import TestCase
 from datalayer.discogsbridge import DiscogsBridge
 from datalayer.artistnotfound import ArtistNotFound
 
-
 class TestDiscogsBridge(TestCase):
 
     def setUp(self) -> None:
@@ -46,4 +45,13 @@ class TestDiscogsBridge(TestCase):
         ids_more = [2411933, 2304638]
         moreartists = self.discogs_bridge.get_artists_from_list(ids_more)
         self.assertEqual(2, len(moreartists))
+
+    def test_minimum_implementation(self):
+        artist = self.discogs_bridge.get_artist_by_id(1141491, 1928)
+        self.assertEqual(1141491, artist["artistID"])
+        self.assertEqual("Alfred G. Karnes", artist["artistName"])
+        self.assertEqual("Alfred G. Karnes", artist["realname"])
+        self.assertEqual("Alfred G. Karnes (1891-1958) was a preacher and gospel singer from the Corbin, Kentucky, area. ", self.artist["profile"])
+        self.assertEqual(0, artist["level"])
+
 

@@ -3,6 +3,7 @@ from multipledispatch import dispatch
 import discogs_client
 from datalayer.artistnotfound import ArtistNotFound
 from discogs_client.exceptions import HTTPError
+from discogs_client import Master
 
 
 class DiscogsBridge(object):
@@ -17,8 +18,8 @@ class DiscogsBridge(object):
 
     @dispatch()
     def __init__(self):
-        key = "YOUR KEY"
-        secret = "YOUR SECRET"
+        key = "aIAdnsHNkTEMBYSlURoZ"
+        secret = "IDriQOntJdAUodJOKzEPCpKLUSFsclim"
         self.__temp_collaborators: list[dict] = []
 
         self.__dc: discogs_client.Client = discogs_client.Client(
@@ -35,7 +36,51 @@ class DiscogsBridge(object):
         :return: dictionary with artist info
         :raises: ArtistNotFound if the artist is not found in Discogs
         """
-        pass
+        try:
+            temp: discogs_client.Artist = self.__dc.artist(aid)
+
+            retdictionary: dict = {}
+
+            retdictionary["artistID"] = temp.id
+            retdictionary["artistName"] = temp.name
+            retdictionary["realname"] = temp.real_name
+            retdictionary["profile"] = temp.profile
+            retdictionary["level"] = 0
+
+            releases = temp.releases
+            collaborators: list = []
+            duplicates: list = []
+
+            for item in releases:
+
+                if hasattr(item, "year") and 0 < item.year <= year:
+
+                    for track in item.tracklist:
+                        extra = track.fetch("extraartists")
+                        if extra is not None:
+                            tempCollab: dict = {}
+                            for extra_artist in extra:
+                                tempCollab["collaboratorID"] = extra_artist["id"]
+                                tempCollab["collaboratorName"] = extra_artist["name"]
+                                tempCollab["releaseID"] = item.id
+                                tempCollab["roles"] = extra_artist["role"]
+
+                                if extra_artist["id"] in duplicates:
+                                    continue
+                                else:
+                                    duplicates.append(extra_artist["id"])
+                                collaborators.append(tempCollab)
+                        else:
+                            continue
+
+            currentArtist = {"collaboratorID": temp.id, "collaboratorName": temp.name, "releaseID": None, "role": "root"}
+
+            collaborators.append(currentArtist)
+            retdictionary["collaborators"] = collaborators
+
+            return retdictionary
+        except HTTPError:
+             raise ArtistNotFound("No artists found", 404)
 
     def get_artists_from_list(self, a_list: list[int], year: int = 1935) -> list[dict]:
         """
